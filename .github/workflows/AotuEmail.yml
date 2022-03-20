@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: AutoEmail
 
 # Controls when the workflow will run
 on:
@@ -28,9 +28,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2.2.2
       
-      # Pip install
-      - name: Python Pip Install
-        uses: logikal-code/pip-install@v1.0.0
+      
       
       # Runs fetch_problems_all.py
       - name: Run fetch_problems_all.py
