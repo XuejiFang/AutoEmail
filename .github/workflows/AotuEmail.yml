@@ -38,6 +38,7 @@ jobs:
       # Runs fetch_problems_all.py
       - name: Run autoemail.py
         run: python autoemail.py
-      
+      - name: Run autoemail1.py
+        run: python autoemail1.py
 
 
