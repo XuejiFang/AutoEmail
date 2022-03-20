@@ -10,6 +10,8 @@ import json
 import time
 from http.server import BaseHTTPRequestHandler
 import  re
+from datetime import datetime
+import pytz
 
 # 获取天气
 def getweather():
@@ -83,7 +85,11 @@ class handler(BaseHTTPRequestHandler):
 
 if __name__ == '__main__':
     # 获取今天（现在时间）
-    time = datetime.datetime.today()
+    tz = pytz.timezone('Asia/Shanghai')  # 东八区
+    t = datetime.fromtimestamp(int(time.time()),
+    pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S %Z%z')
+
+    time = t
     today = str(time)
     Today = today[:10]
     day = int(Today[8:])
