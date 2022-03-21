@@ -172,7 +172,7 @@ if __name__ == '__main__':
     msg['To'] = ','.join(to_addr)
     msg['Subject'] = Header(Today+" "+words)
 
-    pdfApart = MIMEApplication(open(file_name, 'rb').read())
+    pdfApart = MIMEApplication(open("CET/"+file_name, 'rb').read())
     pdfApart.add_header('Content-Disposition', 'attachment', filename=file_name)
 
     msg.attach(textApart)
