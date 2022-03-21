@@ -158,7 +158,7 @@ if __name__ == '__main__':
 
     # 收信方邮箱
     to_addr2 = ['Jaggar.Fang@hotmail.com']
-    to_addr = ['864426656@qq.com']
+    to_addr = ['2901003755@qq.com']
     # 发信服务器
     smtp_server = 'smtp.qq.com'
 
