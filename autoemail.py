@@ -1,8 +1,10 @@
 # smtplib 用于邮件的发信动作
 import smtplib
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 # email 用于构建邮件内容
 from email.header import Header
+from email.mime.application import MIMEApplication
 import datetime
 import linecache
 import requests
@@ -12,6 +14,8 @@ from http.server import BaseHTTPRequestHandler
 import  re
 from datetime import datetime
 import pytz
+from PyPDF2 import PdfFileWriter, PdfFileReader
+import os.path
 
 # 获取天气
 def getweather():
@@ -83,16 +87,50 @@ class handler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(data).encode('utf-8'))
         return
 
+def CET(t):
+    time = t
+    today = str(time)
+    Today = today[:10]
+
+    d1 = datetime.strptime('2022-03-20','%Y-%m-%d')   # 第一个日期
+    d2 = datetime.strptime(Today,'%Y-%m-%d')   # 第二个日期
+    interval = d2 - d1                   # 两日期差距
+    # interval.days                        # 具体的天数
+    print(str(interval))
+
+    # 开始页
+    start = str(interval).split(' ')
+    start_page = int(start[0])-1
+    # 截止页
+    end_page = start_page+1
+
+    output = PdfFileWriter()
+    pdf_file = PdfFileReader(open("cet-6.pdf", "rb"))
+    pdf_pages_len = pdf_file.getNumPages()
+
+    # 保存input.pdf中的1-5页到output.pdf
+    for i in range(start_page, end_page):
+        output.addPage(pdf_file.getPage(i))
+
+    outputStream = open("CET/CET-6 "+str(Today)+".pdf", "wb")
+    output.write(outputStream)
+
 if __name__ == '__main__':
     # 获取今天（现在时间）
     tz = pytz.timezone('Asia/Shanghai')  # 东八区
     t = datetime.fromtimestamp(int(time.time()),
     pytz.timezone('Asia/Shanghai')).strftime('%Y-%m-%d %H:%M:%S %Z%z')
 
+
+
     time = t
     today = str(time)
     Today = today[:10]
     day = int(Today[8:])
+
+    CET(t)
+    file_name = r"CET-6 " + str(Today) + ".pdf"
+
 
     # 获取文案
     words = linecache.getline('words.txt', day)
@@ -103,7 +141,7 @@ if __name__ == '__main__':
     title = []
     url = []
     item = ""
-    for i in range(0, len(data)):
+    for i in range(0, 10):
         title.append(data[i]['title'])
         url.append(data[i]['url'])
         item = item +"NO."+str(i+1)+" "+title[i]+'\n'+url[i]+'\n'
@@ -119,20 +157,26 @@ if __name__ == '__main__':
     password = 'gxipqdrqcaptbach'
 
     # 收信方邮箱
-    to_addr = 'Jaggar.Fang@hotmail.com'
-
+    to_addr = ['Jaggar.Fang@hotmail.com']
+    to_addr2 = ['fangxueji@foxmail.com']
     # 发信服务器
     smtp_server = 'smtp.qq.com'
 
     # 邮箱正文内容，第一个参数为内容，第二个参数为格式(plain 为纯文本)，第三个参数为编码
-    msg = MIMEText(body, 'plain', 'utf-8')
+    #msg = MIMEText(body, 'plain', 'utf-8')
+    textApart = MIMEText(body)
+    msg = MIMEMultipart()
 
     # 邮件头信息
     msg['From'] = Header(from_addr)
-    msg['To'] = Header(to_addr)
+    msg['To'] = ','.join(to_addr)
     msg['Subject'] = Header(Today+" "+words)
 
+    pdfApart = MIMEApplication(open(file_name, 'rb').read())
+    pdfApart.add_header('Content-Disposition', 'attachment', filename=file_name)
 
+    msg.attach(textApart)
+    msg.attach(pdfApart)
 
     # 开启发信服务，这里使用的是加密传输
     server=smtplib.SMTP_SSL(smtp_server)
@@ -141,5 +185,7 @@ if __name__ == '__main__':
     server.login(from_addr, password)
     # 发送邮件
     server.sendmail(from_addr, to_addr, msg.as_string())
+    server.sendmail(from_addr, to_addr2, msg.as_string())
+
     # 关闭服务器
     server.quit()
