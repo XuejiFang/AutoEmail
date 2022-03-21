@@ -18,18 +18,33 @@ from PyPDF2 import PdfFileWriter, PdfFileReader
 import os.path
 
 # 获取天气
-def getweather():
-    r_sh = requests.get("http://www.weather.com.cn/data/sk/101020100.html")
-    r_sh.encoding = 'utf-8'
-    r_cd = requests.get("http://www.weather.com.cn/data/sk/101270101.html")
-    r_cd.encoding = 'utf-8'
+def get_weather_city(url):
+    # open url and get return data
+    r = requests.get(url)
+    if r.status_code != 200:
+        log.error("Can't get weather data!")
 
-    weather_sh = str(r_sh.json()['weatherinfo']['city']) + " " + str(r_sh.json()['weatherinfo']['WD']) + " " + str(
-        r_sh.json()['weatherinfo']['temp'])
-    weather_cd = str(r_cd.json()['weatherinfo']['city']) + " " + str(r_cd.json()['weatherinfo']['WD']) + " " + str(
-        r_cd.json()['weatherinfo']['temp'])
+    # convert string to json
+    info = json.loads(r.content.decode())
 
-    return weather_sh, weather_cd
+    # get useful data
+    data = info['weatherinfo']
+    city = data['city']
+    temp1 = data['temp1']
+    temp2 = data['temp2']
+    weather = data['weather']
+    return "{} {} {}~{}".format(city, weather, temp1, temp2)
+def get_weather_wind(url):
+    r = requests.get(url)
+    if r.status_code != 200:
+        log.error("Can't get weather data!")
+    info = json.loads(r.content.decode())
+
+    # get wind data
+    data = info['weatherinfo']
+    WD = data['WD']
+    WS = data['WS']
+    return "{}({})".format(WD, WS)
 
 # 获取微博热搜
 def get_data():
@@ -116,6 +131,20 @@ def CET(t):
     output.write(outputStream)
 
 if __name__ == '__main__':
+    weather = """**天气提醒**:  
+
+    {} {}  
+    {} {}  
+
+    来源: 国家气象局
+    """.format(
+        get_weather_city('http://www.weather.com.cn/data/cityinfo/101270106.html'),
+        get_weather_wind('http://www.weather.com.cn/data/sk/101270106.html'),
+        get_weather_city('http://www.weather.com.cn/data/cityinfo/101020300.html'),
+        get_weather_wind('http://www.weather.com.cn/data/sk/101020300.html')
+    )
+
+
     # 获取今天（现在时间）
     tz = pytz.timezone('Asia/Shanghai')  # 东八区
     t = datetime.fromtimestamp(int(time.time()),
@@ -135,7 +164,7 @@ if __name__ == '__main__':
     # 获取文案
     words = linecache.getline('words.txt', day)
 
-    [weather_sh, weather_cd] = getweather()
+
 
     data = get_data()
     title = []
@@ -146,7 +175,7 @@ if __name__ == '__main__':
         url.append(data[i]['url'])
         item = item +"NO."+str(i+1)+" "+title[i]+'\n'+url[i]+'\n'
 
-    body = "今日天气："+'\n'+weather_cd+'\n'+weather_sh+'\n'+'\n'+"微博热搜("+today[:19]+")："+'\n'+item
+    body = weather+'\n'+'\n'+"**微博热搜("+today[:19]+")：**"+'\n'+item
 
 
 
@@ -157,8 +186,8 @@ if __name__ == '__main__':
     password = 'gxipqdrqcaptbach'
 
     # 收信方邮箱
-    to_addr2 = ['Jaggar.Fang@hotmail.com']
-    to_addr = ['2901003755@qq.com']
+    to_addr = ['Jaggar.Fang@hotmail.com']
+    to_addr2 = ['fangxueji@foxmail.com']
     # 发信服务器
     smtp_server = 'smtp.qq.com'
 
@@ -172,7 +201,7 @@ if __name__ == '__main__':
     msg['To'] = ','.join(to_addr)
     msg['Subject'] = Header(Today+" "+words)
 
-    pdfApart = MIMEApplication(open("CET/"+file_name, 'rb').read())
+    pdfApart = MIMEApplication(open(file_name, 'rb').read())
     pdfApart.add_header('Content-Disposition', 'attachment', filename=file_name)
 
     msg.attach(textApart)
@@ -185,7 +214,7 @@ if __name__ == '__main__':
     server.login(from_addr, password)
     # 发送邮件
     server.sendmail(from_addr, to_addr, msg.as_string())
-    server.sendmail(from_addr, to_addr2, msg.as_string())
+    # server.sendmail(from_addr, to_addr2, msg.as_string())
 
     # 关闭服务器
     server.quit()
