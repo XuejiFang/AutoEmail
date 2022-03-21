@@ -127,7 +127,7 @@ def CET(t):
     for i in range(start_page, end_page):
         output.addPage(pdf_file.getPage(i))
 
-    outputStream = open("CET/CET-6 "+str(Today)+".pdf", "wb")
+    outputStream = open("CET-6 "+str(Today)+".pdf", "wb")
     output.write(outputStream)
 
 if __name__ == '__main__':
