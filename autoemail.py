@@ -175,7 +175,7 @@ if __name__ == '__main__':
         url.append(data[i]['url'])
         item = item +"NO."+str(i+1)+" "+title[i]+'\n'+url[i]+'\n'
 
-    body = weather+'\n'+'\n'+"**微博热搜("+today[:19]+")：**"+'\n'+item
+    body = weather+'\n'+'\n'+"**微博热搜("+today[:19]+")**："+'\n'+item
 
 
 
@@ -214,7 +214,7 @@ if __name__ == '__main__':
     server.login(from_addr, password)
     # 发送邮件
     server.sendmail(from_addr, to_addr, msg.as_string())
-    # server.sendmail(from_addr, to_addr2, msg.as_string())
+    server.sendmail(from_addr, to_addr2, msg.as_string())
 
     # 关闭服务器
     server.quit()
