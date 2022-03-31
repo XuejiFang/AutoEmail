@@ -183,11 +183,11 @@ if __name__ == '__main__':
 
     # 发信方的信息：发信邮箱，QQ 邮箱授权码
     from_addr = '1213719606@qq.com'
-    password = 'gxipqdrqcaptbach'
+    password = '*********'
 
     # 收信方邮箱
     to_addr2 = ['Jaggar.Fang@hotmail.com']
-    to_addr = ['2901003755@qq.com']
+    to_addr = ['**********']
     # 发信服务器
     smtp_server = 'smtp.qq.com'
 
